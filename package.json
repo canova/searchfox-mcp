@@ -1,0 +1,23 @@
+{
+  "name": "searchfox-mcp",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Nazım Can Altınova",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.20.1",
+    "typescript": "^5.8.3"
+  }
+}
