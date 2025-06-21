@@ -303,7 +303,7 @@ class SearchfoxServer {
   private async getFile(repo: string, path: string) {
     try {
       // All Firefox repos now use the unified repository
-      const githubRepo = "mozilla/firefox";
+      const firefoxGithubRepo = "mozilla/firefox";
 
       // Map Searchfox repo names to GitHub branches
       const branchMapping: Record<string, string> = {
@@ -311,19 +311,22 @@ class SearchfoxServer {
         autoland: "autoland",
         "mozilla-beta": "beta",
         "mozilla-release": "release",
-        "mozilla-esr102": "esr102", // Might be deprecated
-        "mozilla-esr115": "esr115", // Might be deprecated
+        "mozilla-esr115": "esr115",
         "mozilla-esr128": "esr128",
         "mozilla-esr140": "esr140",
-        // Comm-central might still be separate
+        // comm-central is still in mercurial, but there is an experimental
+        // repository in https://github.com/mozilla/releases-comm-central/
         "comm-central": "main",
       };
 
       const branch = branchMapping[repo] || "main";
 
-      // For comm-central, use the separate repo if it still exists
+      // comm-central is still in mercurial, but there is an experimental
+      // repository in https://github.com/mozilla/releases-comm-central/
       const repoToUse =
-        repo === "comm-central" ? "mozilla/comm-unified" : githubRepo;
+        repo === "comm-central"
+          ? "mozilla/releases-comm-central"
+          : firefoxGithubRepo;
 
       // Construct GitHub raw URL
       const githubRawUrl = `https://raw.githubusercontent.com/${repoToUse}/${branch}/${path}`;
