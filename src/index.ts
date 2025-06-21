@@ -62,7 +62,7 @@ class SearchfoxServer {
         capabilities: {
           tools: {},
         },
-      },
+      }
     );
 
     this.setupHandlers();
@@ -146,7 +146,7 @@ class SearchfoxServer {
           if (!searchArgs.query || typeof searchArgs.query !== "string") {
             throw new McpError(
               ErrorCode.InvalidParams,
-              "Query parameter is required and must be a string",
+              "Query parameter is required and must be a string"
             );
           }
 
@@ -175,7 +175,7 @@ class SearchfoxServer {
           if (!fileArgs.path || typeof fileArgs.path !== "string") {
             throw new McpError(
               ErrorCode.InvalidParams,
-              "Path parameter is required and must be a string",
+              "Path parameter is required and must be a string"
             );
           }
 
@@ -284,7 +284,7 @@ class SearchfoxServer {
                 results,
               },
               null,
-              2,
+              2
             ),
           },
         ],
@@ -292,7 +292,7 @@ class SearchfoxServer {
     } catch (error) {
       throw new McpError(
         ErrorCode.InternalError,
-        `Search failed: ${error instanceof Error ? error.message : String(error)}`,
+        `Search failed: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -349,7 +349,7 @@ class SearchfoxServer {
                   searchfoxUrl: `${this.baseUrl}/${repo}/source/${path}`,
                 },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -369,7 +369,7 @@ class SearchfoxServer {
                   note: "Error: GitHub fetch failed",
                 },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -378,7 +378,7 @@ class SearchfoxServer {
     } catch (error) {
       throw new McpError(
         ErrorCode.InternalError,
-        `Failed to fetch file: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to fetch file: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
