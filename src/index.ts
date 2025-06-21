@@ -6,7 +6,6 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
-import axios from "axios";
 
 interface SearchResult {
   path: string;
@@ -23,6 +22,30 @@ interface SearchOptions {
   case?: boolean;
   regexp?: boolean;
   limit?: number;
+}
+
+interface SearchfoxResponse {
+  normal?: Record<
+    string,
+    Array<{
+      path: string;
+      lines: Array<{
+        lno: number;
+        line: string;
+        bounds?: number[];
+        context?: string;
+      }>;
+    }>
+  >;
+  "Textual Occurrences"?: Array<{
+    path: string;
+    lines: Array<{
+      lno: number;
+      line: string;
+      bounds?: number[];
+    }>;
+  }>;
+  "*timedout*"?: boolean;
 }
 
 class SearchfoxServer {
@@ -182,14 +205,18 @@ class SearchfoxServer {
       }
 
       const url = `${this.baseUrl}/${options.repo || "mozilla-central"}/search?${searchParams}`;
-      const response = await axios.get(url, {
+      const response = await fetch(url, {
         headers: {
           Accept: "application/json",
         },
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       // Searchfox returns JSON with a specific structure
-      const data = response.data;
+      const data = (await response.json()) as SearchfoxResponse;
       const results: SearchResult[] = [];
 
       // Process normal results (definitions and uses)
@@ -300,8 +327,13 @@ class SearchfoxServer {
 
       try {
         // Try to fetch from GitHub
-        const response = await axios.get(githubRawUrl);
-        const content = response.data;
+        const response = await fetch(githubRawUrl);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const content = await response.text();
 
         return {
           content: [
@@ -311,10 +343,7 @@ class SearchfoxServer {
                 {
                   repo,
                   path,
-                  content:
-                    typeof content === "string"
-                      ? content
-                      : JSON.stringify(content, null, 2),
+                  content: content,
                   source: "github",
                   url: githubRawUrl,
                   searchfoxUrl: `${this.baseUrl}/${repo}/source/${path}`,
