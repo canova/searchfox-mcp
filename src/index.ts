@@ -82,7 +82,7 @@ class SearchfoxServer {
               limit: {
                 type: "number",
                 description: "Maximum number of results",
-                default: 20,
+                default: 50,
               },
             },
             required: ["query"],
@@ -141,7 +141,7 @@ class SearchfoxServer {
               typeof searchArgs.regexp === "boolean"
                 ? searchArgs.regexp
                 : false,
-            limit: typeof searchArgs.limit === "number" ? searchArgs.limit : 20,
+            limit: typeof searchArgs.limit === "number" ? searchArgs.limit : 50,
           };
 
           return await this.searchCode(options);
