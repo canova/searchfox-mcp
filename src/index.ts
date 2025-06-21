@@ -74,13 +74,14 @@ class SearchfoxServer {
         {
           name: "search_code",
           description:
-            "Search for code in Mozilla repositories using Searchfox",
+            "Search for code in Mozilla repositories using Searchfox.",
           inputSchema: {
             type: "object",
             properties: {
               query: {
                 type: "string",
-                description: "Search query (code, function names, etc.)",
+                description:
+                  "Search query (code, function names, etc.). Can be a regular expression if regexp is set to true.",
               },
               repo: {
                 type: "string",
@@ -90,7 +91,8 @@ class SearchfoxServer {
               },
               path: {
                 type: "string",
-                description: "Limit search to specific path",
+                description:
+                  "Limit search to specific path (e.g. 'tools/profiler')",
               },
               case: {
                 type: "boolean",
@@ -99,7 +101,7 @@ class SearchfoxServer {
               },
               regexp: {
                 type: "boolean",
-                description: "Use regular expression",
+                description: "Use regular expression in query",
                 default: false,
               },
               limit: {
@@ -113,7 +115,8 @@ class SearchfoxServer {
         },
         {
           name: "get_file",
-          description: "Get the contents of a specific file from Searchfox",
+          description:
+            "Get the contents of a specific file from specified repository.",
           inputSchema: {
             type: "object",
             properties: {
