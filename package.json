@@ -21,7 +21,9 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
-    "format:check": "prettier --check src/**/*.ts"
+    "format:check": "prettier --check src/**/*.ts",
+    "clean": "rm -rf dist",
+    "npm-publish": "npm run clean && npm run build && npm publish"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1"
