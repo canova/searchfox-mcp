@@ -13,6 +13,10 @@ interface SearchResult {
   column: number;
   snippet: string;
   context?: string;
+  contextsym?: string;
+  peekRange?: string;
+  upsearch?: string;
+  bounds?: number[];
 }
 
 interface SearchOptions {
@@ -24,29 +28,32 @@ interface SearchOptions {
   limit?: number;
 }
 
-interface SearchfoxResponse {
-  normal?: Record<
-    string,
-    Array<{
-      path: string;
-      lines: Array<{
-        lno: number;
-        line: string;
-        bounds?: number[];
-        context?: string;
-      }>;
-    }>
-  >;
-  "Textual Occurrences"?: Array<{
-    path: string;
-    lines: Array<{
-      lno: number;
-      line: string;
-      bounds?: number[];
-    }>;
-  }>;
-  "*timedout*"?: boolean;
+interface SearchfoxLine {
+  lno: number;
+  line: string;
+  bounds?: number[];
+  context?: string;
+  contextsym?: string;
+  peekRange?: string;
+  upsearch?: string;
 }
+
+interface SearchfoxFile {
+  path: string;
+  lines: SearchfoxLine[];
+}
+
+interface SearchfoxResults {
+  [key: string]: Record<string, SearchfoxFile[]> | SearchfoxFile[];
+}
+
+interface SearchfoxMeta {
+  "*timedout*"?: boolean;
+  "*title*"?: string;
+  limits: string[];
+}
+
+type SearchfoxResponse = SearchfoxResults & SearchfoxMeta;
 
 class SearchfoxServer {
   private server: Server;
@@ -223,14 +230,21 @@ class SearchfoxServer {
       const data = (await response.json()) as SearchfoxResponse;
       const results: SearchResult[] = [];
 
-      // Process normal results (definitions and uses)
-      if (data.normal) {
-        for (const [category, categoryResults] of Object.entries(data.normal)) {
-          if (Array.isArray(categoryResults)) {
-            for (const file of categoryResults) {
+      // Process all sections dynamically (normal, test, thirdparty, generated, etc.)
+      for (const [sectionKey, sectionValue] of Object.entries(data)) {
+        // Skip metadata fields
+        if (sectionKey.startsWith("*")) {
+          continue;
+        }
+
+        // Handle sections that contain categorized results (like "normal", "test", "thirdparty")
+        if (typeof sectionValue === "object" && sectionValue !== null) {
+          // Check if it's a direct array (like "Textual Occurrences")
+          if (Array.isArray(sectionValue)) {
+            const files = sectionValue as SearchfoxFile[];
+            for (const file of files) {
               if (file.lines && Array.isArray(file.lines)) {
                 for (const line of file.lines) {
-                  // Limit results if we've reached the limit
                   if (options.limit && results.length >= options.limit) {
                     break;
                   }
@@ -240,36 +254,51 @@ class SearchfoxServer {
                     line: line.lno,
                     column: line.bounds?.[0] || 0,
                     snippet: line.line,
-                    context: line.context || category,
+                    context: sectionKey,
+                    contextsym: line.contextsym,
+                    peekRange: line.peekRange,
+                    upsearch: line.upsearch,
+                    bounds: line.bounds,
                   });
+                }
+              }
+            }
+          } else {
+            // Handle sections with categorized results (Record<string, Array<...>>)
+            const categoryMap = sectionValue as Record<string, SearchfoxFile[]>;
+            for (const [category, categoryResults] of Object.entries(
+              categoryMap
+            )) {
+              if (Array.isArray(categoryResults)) {
+                for (const file of categoryResults) {
+                  if (file.lines && Array.isArray(file.lines)) {
+                    for (const line of file.lines) {
+                      if (options.limit && results.length >= options.limit) {
+                        break;
+                      }
+
+                      results.push({
+                        path: file.path,
+                        line: line.lno,
+                        column: line.bounds?.[0] || 0,
+                        snippet: line.line,
+                        context: line.context || `${sectionKey}: ${category}`,
+                        contextsym: line.contextsym,
+                        peekRange: line.peekRange,
+                        upsearch: line.upsearch,
+                        bounds: line.bounds,
+                      });
+                    }
+                  }
                 }
               }
             }
           }
         }
-      }
 
-      // Process textual occurrences if no normal results or need more
-      if (
-        data["Textual Occurrences"] &&
-        (!options.limit || results.length < options.limit)
-      ) {
-        for (const file of data["Textual Occurrences"]) {
-          if (file.lines && Array.isArray(file.lines)) {
-            for (const line of file.lines) {
-              if (options.limit && results.length >= options.limit) {
-                break;
-              }
-
-              results.push({
-                path: file.path,
-                line: line.lno,
-                column: line.bounds?.[0] || 0,
-                snippet: line.line,
-                context: "Textual Occurrence",
-              });
-            }
-          }
+        // Break if we've reached the limit
+        if (options.limit && results.length >= options.limit) {
+          break;
         }
       }
 
@@ -282,6 +311,9 @@ class SearchfoxServer {
                 query: options.query,
                 repo: options.repo || "mozilla-central",
                 count: results.length,
+                title: data["*title*"],
+                timedout: data["*timedout*"],
+                limits: data["*limits*"],
                 total_available: data["*timedout*"]
                   ? "Search timed out - more results may be available"
                   : undefined,
