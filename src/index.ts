@@ -74,14 +74,14 @@ class SearchfoxServer {
         {
           name: "search_code",
           description:
-            "Search for code in Mozilla repositories using Searchfox.",
+            "Search for code in Mozilla repositories using Searchfox. Supports both text and file path searches using exact string matching (no search operators). Case insensitive matching and regular expression matching available via options.",
           inputSchema: {
             type: "object",
             properties: {
               query: {
                 type: "string",
                 description:
-                  "Search query (code, function names, etc.). Can be a regular expression if regexp is set to true.",
+                  "Search query using exact string matching. For text searches: enter code, function names, variable names, etc. For file path searches: use glob patterns (substring matching supported). Can be a regular expression if regexp is set to true.",
               },
               repo: {
                 type: "string",
@@ -92,21 +92,22 @@ class SearchfoxServer {
               path: {
                 type: "string",
                 description:
-                  "Limit search to specific path (e.g. 'tools/profiler')",
+                  "Filter results by file path using glob patterns. Path matching uses substring matching - a path matches even if only part of it matches the glob. Use ^ and $ operators to match beginning or end of path (e.g., '^tools/profiler' to match paths starting with tools/profiler, 'profiler$' to match paths ending with profiler).",
               },
               case: {
                 type: "boolean",
-                description: "Case sensitive search",
+                description:
+                  "Enable case sensitive search (default: case insensitive)",
                 default: false,
               },
               regexp: {
                 type: "boolean",
-                description: "Use regular expression in query",
+                description: "Treat query as regular expression pattern",
                 default: false,
               },
               limit: {
                 type: "number",
-                description: "Maximum number of results",
+                description: "Maximum number of results to return",
                 default: 50,
               },
             },
