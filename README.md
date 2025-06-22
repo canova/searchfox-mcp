@@ -31,29 +31,45 @@ Retrieve the contents of a specific file from a Mozilla repository.
 - `path` (string): File path within the repository
 - `repo` (string, optional): Repository name (defaults to "mozilla-central")
 
-## Installation
+## Usage
+
+First clone the repository and run:
+
+```
+# Install dependencies and build the project
+npm install
+npm run build
+
+```
+
+Then add the MCP server to your client.
+
+### Claude Desktop Configuration
+
+Your `claude_desktop_config.json` file should look like this:
+```json
+{
+  "mcpServers": {
+    "searchfox": {
+      "command": "node",
+      "args": [
+        "/path/to/searchfox-mcp/dist/index.js"
+      ]
+    },
+  }
+}
+```
+
+## Development
 
 ```bash
+
 # Install dependencies
 npm install
 
 # Build the project
 npm run build
-```
 
-## Usage
-
-### As an MCP Server
-
-Run the server in stdio mode for MCP client integration:
-
-```bash
-npm start
-```
-
-### Development
-
-```bash
 # Run in development mode with hot reload
 npm run dev
 
