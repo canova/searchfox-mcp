@@ -81,14 +81,14 @@ class SearchfoxServer {
         {
           name: "search_code",
           description:
-            "Search for code in Mozilla repositories using Searchfox. Supports both text and file path searches using exact string matching (no search operators). Case insensitive matching and regular expression matching available via options.",
+            "Search for code in Mozilla repositories using Searchfox. IMPORTANT: Uses exact string matching only - no search operators, no OR logic, no phrase matching with quotes. Multiple words are treated as a single literal string.",
           inputSchema: {
             type: "object",
             properties: {
               query: {
                 type: "string",
                 description:
-                  "Search query using exact string matching. For text searches: enter code, function names, variable names, etc. For file path searches: use glob patterns (substring matching supported). Can be a regular expression if regexp is set to true.",
+                  "Search query using exact literal string matching. CRITICAL: Do NOT use multiple words expecting OR logic (e.g., 'profiler raptor' won't find files containing either word separately). Do NOT use quotes around terms (e.g., '\"profiler\" \"raptor\"' searches for literal quotes). Use single specific terms, function names, or exact code snippets. For broader searches, use separate queries or enable regexp mode.",
               },
               repo: {
                 type: "string",
